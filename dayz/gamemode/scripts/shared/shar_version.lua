@@ -1,5 +1,5 @@
 local VERSION_URLS = {
-    "https://raw.githubusercontent.com/youremeh/gmodz-public/refs/heads/main/version.txt"
+    "https://raw.githubusercontent.com/youremeh/gmodz-public/refs/heads/beta/dayz/version.txt"
 }
 
 local versionPrefixColor = Color(233, 30, 99)
