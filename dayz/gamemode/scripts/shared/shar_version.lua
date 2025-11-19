@@ -1,7 +1,7 @@
 local VERSION_URLS = {
-    "https://raw.githubusercontent.com/SlothGods/gmodz-public/main/version.txt",
-    "https://raw.githubusercontent.com/SlothGods/gmodz-public/master/version.txt",
+    "https://raw.githubusercontent.com/youremeh/gmodz-public/refs/heads/main/version.txt"
 }
+
 local versionPrefixColor = Color(233, 30, 99)
 local versionPrefix = "[GMod-Z] "
 local white = color_white or Color(255, 255, 255)
