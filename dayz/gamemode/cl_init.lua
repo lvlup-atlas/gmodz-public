@@ -12,6 +12,7 @@ include('scripts/client/character.lua')
 include('scripts/client/trade.lua')
 include('scripts/client/killtimer.lua')
 
+include('scripts/shared/shar_version.lua')
 include('scripts/shared/shar_items.lua')
 include('scripts/shared/shar_shops.lua')
 include('scripts/shared/shar_skills.lua')

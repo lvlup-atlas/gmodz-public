@@ -26,26 +26,34 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
     ply:CreateRagdoll()
     ply.AllowRespawn = false
     resetAmmo(ply)
-    if ply:GetNWInt("kills") >= 3 then
-        attacker:SetNWInt("kills", attacker:GetNWInt("kills") - 2)
-        if attacker:IsValid() and attacker ~= ply then
-            attacker:GiveXP(25)
-            attacker:PBroadcast(Color(255, 50, 50), "[DayZ] ", Color(255, 255, 255), "You killed a Bandit!")
+
+    local attackerIsValid = IsValid(attacker)
+    local attackerIsPlayer = attackerIsValid and attacker:IsPlayer()
+    local attackerIsNPC = attackerIsValid and attacker:IsNPC()
+
+    if attackerIsPlayer then
+        if ply:GetNWInt("kills") >= 3 then
+            attacker:SetNWInt("kills", attacker:GetNWInt("kills") - 2)
+            if attacker ~= ply then
+                attacker:GiveXP(25)
+                attacker:PBroadcast(Color(255, 50, 50), "[DayZ] ", Color(255, 255, 255), "You killed a Bandit!")
+            end
+        else
+            attacker:SetNWInt("kills", attacker:GetNWInt("kills") + 1)
+            --if attacker:IsNPC() then
+            --elseif attacker:IsValid() and attacker ~= ply then
+            --    attacker:GiveXP(5)
+            --end
         end
-    else
-        attacker:SetNWInt("kills", attacker:GetNWInt("kills") + 1)
-        --if attacker:IsNPC() then
-        --elseif attacker:IsValid() and attacker ~= ply then
-        --    attacker:GiveXP(5)
-        --end
     end
-    if attacker:IsPlayer() then
+
+    if attackerIsPlayer then
         if attacker:Nick() == ply:Nick() then
             sendDeathMessage(ply, "You failed to survive the apocalypse.")
         else
             sendDeathMessage(ply, "You were killled by "..attacker:Nick())
         end
-    elseif attacker:IsNPC() then
+    elseif attackerIsNPC then
         sendDeathMessage(ply, "You were eaten by a Zombie.")
     else
         sendDeathMessage(ply, "You failed to survive the apocalypse.")

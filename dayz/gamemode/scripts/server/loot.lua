@@ -9,7 +9,7 @@ LootMax = 2500
 weaponLootItems = {}
 basicLootItems = {}
 function ServerLoad()
-    for i = 1, table.Count(DayZItems) do
+    for i = 1, #DayZItems do
         if DayZItems[i].LootType == "Basic" then
             table.insert(basicLootItems, i)
         elseif DayZItems[i].LootType == "Weapon" then
@@ -25,7 +25,7 @@ function SpawnLoot()
     if TotalLoot > LootMax then return end
     local weaponSpawnTable = WeaponLoot[string.lower(game.GetMap())]
     local basicSpawnTable = BasicLoot[string.lower(game.GetMap())]
-    for i = 1, table.Count(DayZItems) do
+    for i = 1, #DayZItems do
         if DayZItems[i].LootType == "Basic" then
             table.insert(basicLootItems, i)
         elseif DayZItems[i].LootType == "Weapon" then

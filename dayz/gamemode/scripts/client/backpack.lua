@@ -1,6 +1,6 @@
 net.Receive("UpdateBackpack", function(len)
     if not Client_Backpack then Client_Backpack = {} end
-    for itemID = 1, table.Count(DayZItems) do Client_Backpack[itemID] = net.ReadUInt(14) end
+    for itemID = 1, #DayZItems do Client_Backpack[itemID] = net.ReadUInt(14) end
     if DFrame_LootMenu and DFrame_LootMenu:IsValid() then DFrame_LootMenu:Remove() lootMenu() end
 end)
 

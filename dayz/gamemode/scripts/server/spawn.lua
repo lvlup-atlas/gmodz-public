@@ -20,19 +20,21 @@ function Lower_HungerWater()
     timer.Create("Lower_Hunger", 20, 0, function()
         for _, ply in pairs(player.GetAll()) do
             if ply:IsValid() and ply.Spawned == true then
-                if ply.Hunger > 0 then
-                    local hungerLose = 2
-                    if ply:HasSkill(7) then hungerLose = 1 end
-                    ply.Hunger = ply.Hunger - hungerLose
-                elseif ply.Hunger == 0 and ply:Alive() then
-                    local healthLoss = 10
-                    if ply:HasSkill(9) then healthLoss = 5 end
-                    ply:SetHealth(ply:Health() - healthLoss)
-                    ply:PBroadcast(Color(255, 50, 50), "[DayZ] ", Color(255, 255, 255), "You are dying of hunger")
-                    if ply:Health() <= 0 and ply:Alive() then ply:Kill() end
+                if not ply.SafeZone then
+                    if ply.Hunger > 0 then
+                        local hungerLose = 2
+                        if ply:HasSkill(7) then hungerLose = 1 end
+                        ply.Hunger = ply.Hunger - hungerLose
+                    elseif ply.Hunger == 0 and ply:Alive() then
+                        local healthLoss = 10
+                        if ply:HasSkill(9) then healthLoss = 5 end
+                        ply:SetHealth(ply:Health() - healthLoss)
+                        ply:PBroadcast(Color(255, 50, 50), "[DayZ] ", Color(255, 255, 255), "You are dying of hunger")
+                        if ply:Health() <= 0 and ply:Alive() then ply:Kill() end
+                    end
                 end
+                saveSurvivalStats(ply)
             end
-            saveSurvivalStats(ply)
         end
     end)
     timer.Create("Update_Client", 2, 0, function()
@@ -48,17 +50,19 @@ function Lower_HungerWater()
     timer.Create("Lower_Thirst", 14, 0, function()
         for _, ply in pairs(player.GetAll()) do
             if ply:IsValid() and ply.Spawned == true then
-                if ply.Thirst > 0 then
-                    local thirstLose = 2
-                    if ply:HasSkill(10) then thirstLose = 1 end
-                    ply.Thirst = ply.Thirst - thirstLose
-                    if ply:Health() <= 0 and ply:Alive() then ply:Kill() end
-                elseif ply.Thirst == 0 and ply:Alive() then
-                    local healthLoss = 15
-                    if ply:HasSkill(9) then healthLoss = 5 end
-                    ply:SetHealth(ply:Health() - healthLoss)
-                    ply:PBroadcast(Color(255, 50, 50), "[DayZ] ", Color(255, 255, 255), "You are dying of thirst")
-                    if ply:Health() <= 0 and ply:Alive() then ply:Kill() end
+                if not ply.SafeZone then
+                    if ply.Thirst > 0 then
+                        local thirstLose = 2
+                        if ply:HasSkill(10) then thirstLose = 1 end
+                        ply.Thirst = ply.Thirst - thirstLose
+                        if ply:Health() <= 0 and ply:Alive() then ply:Kill() end
+                    elseif ply.Thirst == 0 and ply:Alive() then
+                        local healthLoss = 15
+                        if ply:HasSkill(9) then healthLoss = 5 end
+                        ply:SetHealth(ply:Health() - healthLoss)
+                        ply:PBroadcast(Color(255, 50, 50), "[DayZ] ", Color(255, 255, 255), "You are dying of thirst")
+                        if ply:Health() <= 0 and ply:Alive() then ply:Kill() end
+                    end
                 end
                 saveSurvivalStats(ply)
             end
@@ -88,13 +92,9 @@ function Lower_HungerWater()
                 ply:GodEnable()
                 ply:SelectWeapon("weapon_fists")
                 ply.SafeZone = true
-                timer.Pause("Lower_Hunger")
-                timer.Pause("Lower_Thirst")
             else
                 ply:GodDisable()
                 ply.SafeZone = false
-                timer.UnPause("Lower_Thirst")
-                timer.UnPause("Lower_Hunger")
             end
         end
     end)

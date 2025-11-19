@@ -4,7 +4,7 @@ ENT.AdminSpawnable = false
 ENT.RenderGroup = RENDERGROUP_OPAQUE
 
 function ENT:Initialize()
-    for i = 1, table.Count(DayZItems) do
+    for i = 1, #DayZItems do
         if (self:GetModel() == string.lower(DayZItems[i].Model)) then
             self.ItemID = i
             break

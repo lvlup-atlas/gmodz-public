@@ -3,10 +3,27 @@ Client_Bank = Client_Bank or {}
 Client_Skills = Client_Skills or {}
 
 net.Receive("UpdateInventory", function(len)
-    for itemID = 1, table.Count(DayZItems) do Client_Inventory[itemID] = net.ReadUInt(14) end
+    for itemID = 1, #DayZItems do Client_Inventory[itemID] = net.ReadUInt(14) end
     if DFrame_BankMenu and DFrame_BankMenu:IsValid() then
         timer.Simple(0.3, function() bankMenu() end)
     else
+        Inventory_List(DPanel_Inventory_Tab)
+    end
+end)
+
+net.Receive("UpdateItem", function()
+    local updateCount = net.ReadUInt(12)
+    if updateCount == 0 then return end
+    for _ = 1, updateCount do
+        local itemID = net.ReadUInt(14)
+        local quantity = net.ReadUInt(14)
+        Client_Inventory[itemID] = quantity
+    end
+    if DFrame_BankMenu and DFrame_BankMenu:IsValid() then
+        timer.Simple(0.3, function()
+            if DFrame_BankMenu and DFrame_BankMenu:IsValid() then bankMenu() end
+        end)
+    elseif DPanel_Inventory_Tab and DPanel_Inventory_Tab:IsValid() then
         Inventory_List(DPanel_Inventory_Tab)
     end
 end)
@@ -16,12 +33,12 @@ net.Receive("UpdateSkills", function(len)
 end)
 
 net.Receive("UpdateBank", function(len)
-    for itemID = 1, table.Count(DayZItems) do Client_Bank[itemID] = net.ReadUInt(14) end
+    for itemID = 1, #DayZItems do Client_Bank[itemID] = net.ReadUInt(14) end
 end)
 
 function calculateWeight(tbl)
     local TotalWeight = 0
-    for i = 1, table.Count(DayZItems) do
+    for i = 1, #DayZItems do
         if (DayZItems[i].Weight) then TotalWeight = TotalWeight + DayZItems[i].Weight * tbl[i] end
     end
     return TotalWeight

@@ -4,16 +4,25 @@ util.AddNetworkString("airdrop_confirm")
 util.AddNetworkString("airdrop_start")
 
 GM.InAirDrop = false
-GM.AirDropPos = Vector()
+GM.AirDropPos = nil
 GM.AirDropEnt = Entity(1)
 
-hook.Add("Think", "airdrop_think", function()
+local AIRDROP_MONITOR_INTERVAL = 1
+
+local function monitorAirDropState()
     if GAMEMODE.InAirDrop then
-        if GAMEMODE.AirDropPos == Vector() then GAMEMODE.ForceStopAirDrop() end
-    else
-        if #ents.FindByClass("thrown_airdrop") > 0 or #ents.FindByClass("airdrop_plane") > 0 then GAMEMODE.ForceStopAirDrop() end
+        if not GAMEMODE.AirDropPos or not IsValid(GAMEMODE.AirDropEnt) then
+            GAMEMODE.ForceStopAirDrop()
+        end
+        return
     end
-end)
+
+    if next(ents.FindByClass("thrown_airdrop")) or next(ents.FindByClass("airdrop_plane")) then
+        GAMEMODE.ForceStopAirDrop()
+    end
+end
+
+timer.Create("DayZAirdropMonitor", AIRDROP_MONITOR_INTERVAL, 0, monitorAirDropState)
 
 function GM.StartAirDrop(ent)
     if not ent:IsValid() then return end
@@ -46,8 +55,8 @@ end
 concommand.Add("airdropstuff", GM.StartAirDrop)
 
 function GM.ForceStopAirDrop()
-    GAMEMODE.AirDropPos = Vector()
-    GAMEMODE.AirDropEntity = Entity(1)
+    GAMEMODE.AirDropPos = nil
+    GAMEMODE.AirDropEnt = Entity(1)
     GAMEMODE.InAirDrop = false
     for k, v in pairs(ents.FindByClass("thrown_airdrop")) do v:Remove() end
     for k, v in pairs(ents.FindByClass("airdrop_plane")) do v:Remove() end

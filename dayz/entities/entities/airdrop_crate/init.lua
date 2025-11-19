@@ -54,12 +54,12 @@ end
 function UpdateAirdropLoot(backpack, ply)
     ply.LootTarget = backpack
     net.Start("UpdateBackpack")
-    for i = 1, table.Count(DayZItems) do
+    for i = 1, #DayZItems do
         net.WriteUInt(backpack.Inventory[i] or 0, 14)
     end
     net.Send(ply)
     local backpackFull = false
-    for i = 1, table.Count(DayZItems) do
+    for i = 1, #DayZItems do
         if (backpack.Inventory[i] or 0) > 0 then
             backpackFull = true
             break

@@ -25,11 +25,11 @@ function shopItems(frame, shoptype)
         DLabel_ItemName:SizeToContents()
         DLabel_ItemName:SetParent(Shop_Item)
         DLabel_ItemName:SetPos(125, 10)
-        if DayZItems[item].Desc ~= nil then
+        if DayZItems[item].Description ~= nil then
             local DLabel_ItemDesc = vgui.Create("DLabel")
             DLabel_ItemDesc:SetColor(Color(255, 255, 255, 255))
             DLabel_ItemDesc:SetFont("Trebuchet18")
-            DLabel_ItemDesc:SetText(DayZItems[item].Desc)
+            DLabel_ItemDesc:SetText(DayZItems[item].Description)
             DLabel_ItemDesc:SizeToContents()
             DLabel_ItemDesc:SetParent(Shop_Item)
             DLabel_ItemDesc:SetPos(125, 30)

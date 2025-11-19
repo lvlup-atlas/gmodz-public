@@ -178,7 +178,7 @@ end
 
 net.Receive("UpdateTrade", function(len)
     local ent = net.ReadEntity()
-    for itemID = 1, table.Count(DayZItems) do ent.OfferedItems[itemID] = net.ReadUInt(14) end
+    for itemID = 1, #DayZItems do ent.OfferedItems[itemID] = net.ReadUInt(14) end
     ent.OfferedItems["money"] = net.ReadUInt(14)
     updateTradeMenu()
     PLAYER_1.AcceptTrade = nil

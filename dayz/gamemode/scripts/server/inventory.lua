@@ -43,7 +43,7 @@ end
 function PMETA:AddWeight()
     local weight = 0
     local bankWeight = 0
-    for i = 1, table.Count(DayZItems) do
+    for i = 1, #DayZItems do
         if (DayZItems[i].Weight) then
             weight = weight + DayZItems[i].Weight * self.Inventory[i]
             bankWeight = bankWeight + DayZItems[i].Weight * self.BankTable[i]
@@ -64,7 +64,7 @@ function PMETA:DropAll()
     BackPackEnt.Inventory = {}
     BackPackEnt:Spawn()
     if (BackPackEnt:GetPhysicsObject():IsValid() and self:Alive()) then BackPackEnt:GetPhysicsObject():ApplyForceCenter(Vector(0, 0, -1)) end
-    for i = 1, table.Count(DayZItems) do
+    for i = 1, #DayZItems do
         BackPackEnt.Inventory[i] = self.Inventory[i]
         if (self.Perk[3] == true) and (math.random(0, 100) <= 100) then
             self:SetItem(i, 0)
@@ -79,7 +79,7 @@ function PMETA:LoadInventory()
     if not self.Inventory then self.Inventory = {} end
     local playerItems = sql.QueryRow("SELECT * FROM DayZ_items WHERE unique_id = '"..self:SteamID() .. "'")
     playerItems.unique_id = nil
-    for i = 1, table.Count(DayZItems) do self.Inventory[i] = tonumber(playerItems["Item"..i]) end
+    for i = 1, #DayZItems do self.Inventory[i] = tonumber(playerItems["Item"..i]) end
     self:LoadBank()
     self:SendInventory()
     self:AddWeight()
@@ -143,22 +143,56 @@ net.Receive("CL_BuySkill", function(len, ply) ply:BuySkill(net.ReadUInt(14)) end
 
 function PMETA:SendInventory()
     net.Start("UpdateInventory")
-    for i = 1, table.Count(DayZItems) do net.WriteUInt(self.Inventory[i], 14) end
+    for i = 1, #DayZItems do net.WriteUInt(self.Inventory[i], 14) end
     net.Send(self)
 end
 
 function PMETA:UpdateItem(itemID)
-    sql.Query("UPDATE DayZ_items SET "..tostring("Item"..itemID) .. " = "..self.Inventory[itemID] .. " WHERE unique_id = '"..self:SteamID() .. "'")
-    self:SendInventory()
+    if not self.Inventory then return end
+    if not itemID then return end
+    self.PendingInventoryUpdates = self.PendingInventoryUpdates or {}
+    self.PendingInventoryUpdates[itemID] = self.Inventory[itemID]
+    if self.PendingInventoryFlushScheduled then return end
+    self.PendingInventoryFlushScheduled = true
+    timer.Simple(0, function()
+        if not IsValid(self) then return end
+        self.PendingInventoryFlushScheduled = false
+        self:FlushInventoryUpdates()
+    end)
+end
+
+function PMETA:FlushInventoryUpdates()
+    local pending = self.PendingInventoryUpdates
+    if not pending or next(pending) == nil then return end
+    self.PendingInventoryUpdates = nil
+    local assignments = {}
+    local updateCount = 0
+    for itemID, quantity in pairs(pending) do
+        updateCount = updateCount + 1
+        local qty = tonumber(quantity) or 0
+        assignments[#assignments + 1] = string.format("Item%d = %d", itemID, qty)
+    end
+    if updateCount == 0 then return end
+    sql.Query("UPDATE DayZ_items SET "..table.concat(assignments, ", ") .. " WHERE unique_id = '"..self:SteamID() .. "'")
+    net.Start("UpdateItem")
+    net.WriteUInt(updateCount, 12)
+    for itemID, quantity in pairs(pending) do
+        local qty = tonumber(quantity) or 0
+        net.WriteUInt(itemID, 14)
+        net.WriteUInt(qty, 14)
+    end
+    net.Send(self)
+    self:AfterInventoryUpdate()
+end
+
+function PMETA:AfterInventoryUpdate()
     self:UpdateWeapons()
     self:AddWeight()
+    if UseM9K then return end
     local wep = self:GetActiveWeapon()
-    if not UseM9K then
-        local wep = self:GetActiveWeapon()
-        if (wep:IsValid() and wep:IsWeapon() and wep:Clip2() >= 0) then
-            wep:SetClip2(HasItem(self, wep.Primary.AmmoItem))
-            wep:UpdateClip()
-        end
+    if (wep:IsValid() and wep:IsWeapon() and wep:Clip2() >= 0) then
+        wep:SetClip2(HasItem(self, wep.Primary.AmmoItem))
+        wep:UpdateClip()
     end
 end
 
@@ -170,15 +204,15 @@ function PMETA:setCharModel(face, clothes, gender)
 end
 
 function PMETA:UpdateCharModel()
-    gender = tonumber(self.gender)
-    face = tonumber(self.face)
-    clothes = tonumber(self.clothes)
+    local gender = tonumber(self.gender)
+    local face = tonumber(self.face)
+    local clothes = tonumber(self.clothes)
     if face == 99 then
         self:SetModel("models/combine_sniper.mdl")
     else
         if (gender == 0) then
             self:SetModel(DayZ_Male[face][clothes])
-        elseif (gander == 1) then
+        elseif (gender == 1) then
             self:SetModel(DayZ_Female[face][clothes])
         elseif (gender == 2) then
             self:SetModel(DayZ_Custom[face][clothes])
@@ -190,7 +224,7 @@ end
 net.Receive("CL_UpdateCharacter", function(len, ply) ply:setCharModel(net.ReadUInt(6), net.ReadUInt(6), net.ReadUInt(6)) end)
 
 function PMETA:UpdateWeapons()
-    for ItemID = 1, table.Count(DayZItems) do
+    for ItemID = 1, #DayZItems do
         if DayZItems[ItemID].Weapon ~= nil then
             if self:HasItem(ItemID) then
                 self:Give(DayZItems[ItemID].Weapon)
@@ -217,7 +251,6 @@ end
 function PMETA:SetItem(itemID, amount)
     local amount = tonumber(amount)
     self.Inventory[itemID] = amount
-    sql.Query("UPDATE DayZ_items SET "..tostring("Item"..itemID) .. " = "..self.Inventory[itemID] .. " WHERE unique_id = '"..self:SteamID() .. "'")
     self:UpdateItem(itemID)
 end
 
@@ -233,7 +266,12 @@ function PMETA:UseItem(itemID)
     local useItem = DayZItems[itemID].useFunc(self, itemID)
     if not useItem then self:TakeItem(itemID, 1) end
 end
-concommand.Add("useitem", function(ply, cmd, args) ply:UseItem(itemID) end)
+concommand.Add("useitem", function(ply, cmd, args)
+    if not args or not args[1] then return end
+    local itemID = tonumber(args[1])
+    if not itemID then return end
+    ply:UseItem(itemID)
+end)
 
 net.Receive("CL_UseItem", function(len, ply)
     ply:UseItem(net.ReadUInt(14))
@@ -261,11 +299,8 @@ function PMETA:GivePerk(perk)
 end
 
 function PMETA:HasPerk(perk)
-    if self.Perk[perk] == 1 then
-        return true
-    else
-        return false
-    end
+    if not self.Perk then return false end
+    return self.Perk[perk] == true
 end
 
 function PMETA:PlaceItem(ItemID, position, rotation)
@@ -456,7 +491,7 @@ function PMETA:LoadBank()
     if not self.BankTable then self.BankTable = {} end
     local bankItems = sql.QueryRow("SELECT * FROM DayZ_bank WHERE unique_id = '"..self:SteamID() .. "'")
     bankItems.unique_id = nil
-    for i = 1, table.Count(DayZItems) do self.BankTable[i] = tonumber(bankItems["Item"..i]) end
+    for i = 1, #DayZItems do self.BankTable[i] = tonumber(bankItems["Item"..i]) end
     self:SendBank()
 end
 
@@ -467,7 +502,7 @@ end
 
 function PMETA:SendBank()
     net.Start("UpdateBank")
-    for i = 1, table.Count(DayZItems) do net.WriteUInt(self.BankTable[i], 14) end
+    for i = 1, #DayZItems do net.WriteUInt(self.BankTable[i], 14) end
     net.Send(self)
 end
 

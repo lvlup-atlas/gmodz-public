@@ -126,18 +126,54 @@ function saveSurvivalStats(ply)
     sql.Query("UPDATE DayZ_stats SET alive = "..alive..", health = "..ply:Health() .. ", thirst = "..ply.Thirst..", hunger = "..ply.Hunger.." WHERE unique_id = '"..ply:SteamID() .. "'")
 end
 
+local function getTableColumns(tableName)
+    local columns = {}
+    if not sql.TableExists(tableName) then return columns end
+    local result = sql.Query("PRAGMA table_info("..tableName .. ")")
+    if type(result) == "table" then
+        for _, row in ipairs(result) do
+            if row.name then columns[row.name] = true end
+        end
+    end
+    return columns
+end
+
+local function ensureColumnExists(tableName, columnName)
+    local query = string.format("ALTER TABLE %s ADD %s int DEFAULT '0' NOT NULL", tableName, columnName)
+    local ok = sql.Query(query)
+    if ok == false then
+        ErrorNoHalt(string.format("[DayZ] Failed to add column %s to %s: %s\n", columnName, tableName, sql.LastError() or "unknown error"))
+    end
+end
+
 function updateInventoryTable()
-    if sql.TableExists("DayZ_items") then
-        for i = 1, table.Count(DayZItems) do
-            sql.Query("ALTER TABLE DayZ_items ADD "..tostring("Item"..i) .. " int DEFAULT '0' NOT NULL")
-            sql.Query("ALTER TABLE DayZ_bank ADD "..tostring("Item"..i) .. " int DEFAULT '0' NOT NULL")
+    if not (sql.TableExists("DayZ_items") and sql.TableExists("DayZ_bank")) then return end
+    local itemColumns = getTableColumns("DayZ_items")
+    local bankColumns = getTableColumns("DayZ_bank")
+    local itemCount = #DayZItems
+    for i = 1, itemCount do
+        local columnName = "Item"..i
+        if not itemColumns[columnName] then
+            ensureColumnExists("DayZ_items", columnName)
+            itemColumns[columnName] = true
+        end
+        if not bankColumns[columnName] then
+            ensureColumnExists("DayZ_bank", columnName)
+            bankColumns[columnName] = true
         end
     end
 end
 
 function updateSkillTable()
-    if sql.TableExists("DayZ_skills") then
-        for i = 1, table.Count(DayZSkills) do sql.Query("ALTER TABLE DayZ_skills ADD "..tostring("Skill"..i) .. " int DEFAULT '0' NOT NULL") end
+    if not sql.TableExists("DayZ_skills") then return end
+
+    local skillColumns = getTableColumns("DayZ_skills")
+    for i = 1, table.Count(DayZSkills) do
+        local columnName = "Skill"..i
+        if not skillColumns[columnName] then
+            ensureColumnExists("DayZ_skills", columnName)
+            skillColumns[columnName] = true
+        end
     end
 end
 
@@ -190,12 +226,31 @@ function playerAccountValid(ply)
     end
 end
 
+local POS_SAVE_TIMER_PREFIX = "DayZPosSave_"
+
+local function getPosSaveTimerName(ply)
+    return POS_SAVE_TIMER_PREFIX .. (ply:SteamID64() or ply:EntIndex())
+end
+
+local function stopPosSaveTimer(ply)
+    timer.Remove(getPosSaveTimerName(ply))
+end
+
 function PlayerInitialSpawn(ply)
-    if ply:IsValid() then
-        timer.Create(ply:Nick() .. "posSave", 15, 0, function()
-            if ply:IsValid() then saveLocation(ply) end
-        end)
-    end
+    if not IsValid(ply) then return end
+
+    local timerName = getPosSaveTimerName(ply)
+    timer.Remove(timerName)
+
+    timer.Create(timerName, 15, 0, function()
+        if not IsValid(ply) then
+            timer.Remove(timerName)
+            return
+        end
+
+        saveLocation(ply)
+    end)
+
     --[[
         -- Uncomment this timer if you have leys screencap and wanna pre-check players before playing
     timer.Create("TakeSnap", 25, 1, function()
@@ -208,3 +263,8 @@ function PlayerInitialSpawn(ply)
     --]]
 end
 hook.Add("PlayerInitialSpawn", "PlayerInitialSpawn", PlayerInitialSpawn)
+
+hook.Add("PlayerDisconnected", "DayZStopPosSave", function(ply)
+    if not IsValid(ply) then return end
+    stopPosSaveTimer(ply)
+end)
