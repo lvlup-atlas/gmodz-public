@@ -15,6 +15,9 @@ CarSpawns["rp_stalker_new"] = {
     Vector(-4095.6306152344, 12041.888671875, 61.302124023438),
     Vector(-7818.6630859375, 2896.654296875, -639.24969482422),
 }
+CarSpawns["gm_construct"] = {
+    Vector(0.0, 0.0, 0.0),
+}
 
 function AddHeli()
     timer.Create("Heli_Respawn", 60, 0, function()

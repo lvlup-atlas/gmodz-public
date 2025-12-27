@@ -1,9 +1,9 @@
-surface.CreateFont("AmmoType1",         {font = "TargetID",     size = 60, weight = 600})
-surface.CreateFont("AmmoType2",         {font = "TargetID",     size = 35, weight = 600})
-surface.CreateFont("TargetIDWeighted",  {font = "Trebuchet24",  size = 18, weight = 1000})
-surface.CreateFont("TargetIDLarge",     {font = "TargetID",     size = 40, weight = 600})
-surface.CreateFont("TargetIDMedium",    {font = "TargetID",     size = 20, weight = 600})
-surface.CreateFont("TargetIDSmall",     {font = "TargetID",     size = 15, weight = 400})
+surface.CreateFont("AmmoType1",         {font = "TargetID",    size = 60, weight = 600})
+surface.CreateFont("AmmoType2",         {font = "TargetID",    size = 35, weight = 600})
+surface.CreateFont("TargetIDWeighted",  {font = "Trebuchet24", size = 18, weight = 1000})
+surface.CreateFont("TargetIDLarge",     {font = "TargetID",    size = 40, weight = 600})
+surface.CreateFont("TargetIDMedium",    {font = "TargetID",    size = 20, weight = 600})
+surface.CreateFont("TargetIDSmall",     {font = "TargetID",    size = 15, weight = 400})
 
 local mat_background_cracks = Material("icons/background_cracks")
 local mat_minimap = Material("icons/minimap")
@@ -214,10 +214,10 @@ function drawPlayerHud()
         surface.DrawTexturedRectUV(halfSW - halfSafeZoneW, fifthSH + halfSafeZoneH, SafeZoneW, 2, 0, 0, SafeZoneW * 0.002, 2 * 0.002)
         surface.DrawTexturedRectUV(halfSW - halfSafeZoneW, fifthSH - halfSafeZoneH, 2, SafeZoneH, 0, 0, 2 * 0.002, SafeZoneH * 0.002)
         surface.DrawTexturedRectUV(halfSW + halfSafeZoneW, fifthSH - halfSafeZoneH, 2, SafeZoneH, 0, 0, 2 * 0.002, SafeZoneH * 0.002)
-        DrawFadingText(0.5, "SAFE ZONE WARNING", "TargetIDLarge", halfSW, fifthSH - 45, Color(255, 0, 0, 255), Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
-        draw.DrawText("You can't be hurt while inside the SafeZone", "TargetIDMedium", halfSW, fifthSH, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
+        DrawFadingText(0.5, "SAFE ZONE", "TargetIDLarge", halfSW, fifthSH - 45, Color(0, 255, 0, 255), Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
+        draw.DrawText("You can't be hurt while inside the safe zone", "TargetIDMedium", halfSW, fifthSH, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
         if UseNewShop then
-            draw.DrawText("SafeZone Shop is located inside the building", "TargetIDMedium", halfSW, fifthSH + 23, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
+            draw.DrawText("Safe zone shop is located inside the building", "TargetIDMedium", halfSW, fifthSH + 23, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
         else
             draw.DrawText("Press F2 to access the SafeZone Shop", "TargetIDMedium", halfSW, fifthSH + 23, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
         end
@@ -255,8 +255,8 @@ function drawPlayerHud()
             surface.SetDrawColor(Color(0, 0, 0, 230))
             surface.DrawTexturedRectUV(SW - 300, SH - 30, 300, 40, 0, 0, 0.3, 0.04)
             draw.DrawText("$"..LocalPlayer().Money, "TargetIDMedium", SW - 250, SH - 25, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
-            draw.DrawText("XP:"..LocalPlayer().XP, "TargetIDMedium", SW - 50, SH - 25, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
-            draw.DrawText("Credits:"..LocalPlayer().Credits, "TargetIDMedium", SW - 150, SH - 25, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
+            draw.DrawText("XP: "..LocalPlayer().XP, "TargetIDMedium", SW - 50, SH - 25, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
+            draw.DrawText("Credits: "..LocalPlayer().Credits, "TargetIDMedium", SW - 150, SH - 25, Color(255, 255, 255, 255), TEXT_ALIGN_CENTER)
         end
     end
 end
@@ -363,13 +363,13 @@ function DrawPickups()
     local traceRes = LocalPlayer():GetEyeTrace()
     local trace = util.TraceLine(traceRes)
     local dropTypes = {}
-    dropTypes["base_item"] = {"PRESS [E] TO PICKUP"}
-    dropTypes["money"] = {"PRESS [E] TO PICKUP MONEY", "MONEY"}
-    dropTypes["backpack"] = {"PRESS [E] TO LOOT BACKPACK", "BACKPACK"}
-    dropTypes["bank"] = {"PRESS [E] TO ACCESS BANK", "SAFE ZONE BANK"}
-    if UseNewShop then dropTypes["shop"] = {"PRESS [E] TO ACCESS SHOP", "SAFE ZONE SHOP"} end
-    dropTypes["player"] = {"PRESS [E] TO TRADE", "TRADE"}
-    dropTypes["airdrop_crate"] = {"PRESS [E] TO LOOT AIRDROP", "AIRDROP CRATE"}
+    dropTypes["base_item"] = {"[E] TO PICKUP"}
+    dropTypes["money"] = {"[E] TO PICKUP MONEY", "MONEY"}
+    dropTypes["backpack"] = {"[E] TO LOOT BACKPACK", "BACKPACK"}
+    dropTypes["bank"] = {"[E] TO ACCESS BANK", "SAFE ZONE BANK"}
+    if UseNewShop then dropTypes["shop"] = {"[E] TO ACCESS SHOP", "SAFE ZONE SHOP"} end
+    dropTypes["player"] = {"[E] TO TRADE", "TRADE"}
+    dropTypes["airdrop_crate"] = {"[E] TO LOOT AIRDROP", "AIRDROP CRATE"}
     if traceRes.HitPos and LocalPlayer():Alive() then
         for _, ent in pairs(ents.FindInSphere(traceRes.HitPos, 15)) do
             if ent and ent:IsValid() and (ent:GetPos() - LocalPlayer():GetPos()):Length() < 80 then
@@ -386,12 +386,12 @@ function DrawPickups()
                     end
                     surface.SetMaterial(mat_background_cracks)
                     surface.SetDrawColor(Color(0, 0, 0, 200))
-                    surface.DrawTexturedRectUV(screenPos.x + 20, screenPos.y - 40, 220, 25, 0, 0, 0.22, 0.025)
-                    surface.SetMaterial(mat_background_cracks)
-                    surface.SetDrawColor(Color(0, 0, 0, 200))
-                    surface.DrawTexturedRectUV(screenPos.x + 20, screenPos.y - 10, 220, 25, 0, 0, 0.22, 0.05)
-                    draw.DrawText(pickupMsg, "ChatFont", screenPos.x + 40, screenPos.y - 10, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT)
-                    draw.DrawText(dropTypes[class][1], "ChatFont", screenPos.x + 40, screenPos.y - 40, Color(182, 87, 93, 255), TEXT_ALIGN_LEFT)
+                    surface.DrawTexturedRectUV(screenPos.x + 20, screenPos.y - 25, 250, 25, 0, 0, 0.22, 0.025)
+                    draw.DrawText(pickupMsg, "ChatFont", screenPos.x + 40, screenPos.y - 25, Color(255, 255, 255, 255), TEXT_ALIGN_LEFT)
+                    --surface.SetMaterial(mat_background_cracks)
+                    --surface.SetDrawColor(Color(0, 0, 0, 200))
+                    --surface.DrawTexturedRectUV(screenPos.x + 20, screenPos.y - 10, 250, 25, 0, 0, 0.22, 0.05)
+                    --draw.DrawText(dropTypes[class][1], "ChatFont", screenPos.x + 40, screenPos.y - 10, Color(182, 87, 93, 255), TEXT_ALIGN_LEFT)
                     surface.SetDrawColor(255, 255, 255, 255)
                     surface.SetMaterial(mat_pickup)
                     surface.DrawTexturedRect(screenPos.x - 45, screenPos.y - 45, 64, 64)

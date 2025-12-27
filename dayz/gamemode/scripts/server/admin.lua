@@ -53,51 +53,6 @@ function DZ_AddMoney(admin, cmd, args)
 end
 concommand.Add('dz_AddMoney', DZ_AddMoney)
 
-function DZ_GiveItem(admin, cmd, args)
-    local player = Player(args[1])
-    local item = math.floor(tonumber(args[2]))
-    local amount = math.floor(tonumber(args[3]))
-    if admin:IsDayZSuperAdmin() then
-        admin:PBroadcast(Color(255, 50, 50), '[DayZ] ', Color(255, 255, 255), 'You gave '..player:Nick()..' '..amount..'x of item id '..item)
-        player:GiveItem(item, amount)
-        player:PBroadcast(Color(255, 50, 50), '[DayZ] ', Color(255, 255, 255), 'You\'ve received '..amount..'x of item id '..item..' by '..admin:Nick())
-        saveMoney(player)
-    else
-        admin:PBroadcast(Color(255, 50, 50), '[DayZ] ', Color(255, 255, 255), 'You don\'t have access to this command.')
-    end
-end
-concommand.Add('dz_GiveItem', DZ_GiveItem)
-
-function DZ_TeleportToPlayer(admin, cmd, args)
-    if admin:IsDayZAdmin() then
-        if admin:Alive() then admin:SetPos(Player(args[1]):GetPos() + Vector(52, 52, 2)) end
-    end
-end
-concommand.Add('dz_TeleportToPlayer', DZ_TeleportToPlayer)
-
-function DZ_TeleportPlayerHere(admin, cmd, args)
-    if admin:IsDayZAdmin() then
-        if admin:Alive() then Player(args[1]):SetPos(admin:GetPos() + Vector(52, 52, 2)) end
-    end
-end
-concommand.Add('dz_TeleportPlayerHere', DZ_TeleportPlayerHere)
-
-function DZ_Kick(admin, cmd, args)
-    local ply = Player(tonumber(args[1]))
-    if (admin:IsDayZAdmin()) then ply:Kick('Kicked: '..tostring(args[2])) end
-end
-concommand.Add('dz_Kick', DZ_Kick)
-
-function DZ_Ban(admin, cmd, args)
-    local ply = Player(tonumber(args[1]))
-    if (admin:IsDayZAdmin()) then
-        ply:SetNWInt('plevel', -1)
-        saveMoney(ply)
-        ply:Kick('Banned: '..tostring(args[2]))
-    end
-end
-concommand.Add('dz_Ban', DZ_Ban)
-
 function SetRank(ply, SteamID, rank)
     local SteamID = tostring(SteamID)
     local rank = tonumber(rank)

@@ -22,7 +22,7 @@ function GM:HUDDrawScoreboard()
     DPanel_Scoreboard:SetWide(800)
     DPanel_Scoreboard:Center()
     DPanel_Scoreboard:SetVisible(true)
-    DPanel_Scoreboard.Paint = function() draw.DrawText("Community Name - scoreboard.lua - line 25", "ScoreboardHeaderNoLines", 0, 0, Color(200, 200, 200, 255), TEXT_ALIGN_LEFT) end
+    DPanel_Scoreboard.Paint = function() draw.DrawText("Ironvale", "ScoreboardHeaderNoLines", 0, 0, Color(200, 200, 200, 255), TEXT_ALIGN_LEFT) end
     local DPanelList_Players = vgui.Create("DPanelList", DPanel_Scoreboard)
     DPanelList_Players:SetPos(0, 35)
     DPanelList_Players:SetTall(640)
@@ -141,17 +141,6 @@ function GM:HUDDrawScoreboard()
                         giveXPMenu:AddOption(xp[i], function() RunConsoleCommand("dz_GiveXP", ply:UserID(), xp[i]) end)
                     end
                     playerOptions:AddOption("Reset Money", function() RunConsoleCommand("dz_ResetMoney", ply:UserID()) end)
-                    playerOptions:AddOption("Teleport To Player", function() RunConsoleCommand("dz_TeleportToPlayer", ply:UserID()) end)
-                    playerOptions:AddOption("Teleport Player Here", function() RunConsoleCommand("dz_TeleportPlayerHere", ply:UserID()) end)
-                    local ruleTable = {'Breaking Community Rules & Guidelines', 'Hack/Cheat/Exploit', 'Trolling', 'Combat Logging', 'Malicious/Sexual Acts'}
-                    local kickMenu = playerOptions:AddSubMenu("Kick", function () end)
-                    for i = 1, table.Count(ruleTable) do
-                        kickMenu:AddOption(ruleTable[i], function() RunConsoleCommand("dz_Kick", ply:UserID(), ruleTable[i]) end)
-                    end
-                    local banMenu = playerOptions:AddSubMenu("Ban", function () end)
-                    for i = 1, table.Count(ruleTable) do
-                        banMenu:AddOption(ruleTable[i], function() RunConsoleCommand("dz_Ban", ply:UserID(), ruleTable[i]) end)
-                    end
                 end
                 playerOptions:Open(gui.MousePos())
             end

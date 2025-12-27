@@ -829,7 +829,7 @@ local items = {
     },
 
     {
-        Name = "Deagle",
+        Name = "Desert Eagle",
         Description = "Heavy caliber semi automatic pistol with tremendous stopping power.",
         Model = "models/weapons/w_pist_deagle.mdl",
         Weight = 4.5,
