@@ -4,7 +4,7 @@ IF YOU HAVE ANY QUESTIONS ABOUT THIS GAMEMODE OR ITS ADDONS, I WILL NOT HELP YOU
 
 # Garry's Mod Day-Z Gamemode
 
-Edited by [atlas](https://github.com/lvlup-atlas)]
+Edited by [atlas](https://github.com/lvlup-atlas)
 
 # Install Instructions
 1. [Download the SQL files](https://github.com/FredyH/MySQLOO/releases) - Both Windows, and Linux users **NEED** to do this
